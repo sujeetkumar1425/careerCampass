@@ -137,20 +137,32 @@ export function TimelineTracker({ userProfile }: TimelineTrackerProps) {
   const [error, setError] = useState('');
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-lg font-medium">
-            Loading latest opportunities...
-          </div>
-
-          <p className="text-muted-foreground mt-2">
-            Fetching current exams, admissions and scholarships
-          </p>
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <div className="text-lg font-medium">
+          Loading latest opportunities...
         </div>
+
+        <p className="text-muted-foreground mt-2">
+          Fetching current exams, admissions and scholarships
+        </p>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+if (!userProfile) {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="text-center">
+        <p className="text-muted-foreground">
+          Please sign in to view your timeline.
+        </p>
+      </div>
+    </div>
+  );
+}
   if (error) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
