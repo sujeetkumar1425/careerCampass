@@ -176,30 +176,75 @@ export function TimelineTracker({ userProfile }: TimelineTrackerProps) {
     );
   }
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        setError('');
+  const fetchEvents = async () => {
+    try {
+      console.log('🔵 Fetching timeline events...');
 
-        const response = await fetch('/api/timeline-events');
+      setLoading(true);
+      setError('');
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch timeline events');
-        }
+      const controller = new AbortController();
 
-        const data = await response.json();
+      // Stop waiting if the API takes more than 10 seconds
+      const timeout = setTimeout(() => {
+        controller.abort();
+      }, 10000);
 
-        setEvents(data);
-      } catch (error) {
-        console.error('Timeline API error:', error);
-        setError('Unable to load current exam and registration data.');
-      } finally {
-        setLoading(false);
+      const apiUrl = `${window.location.origin}/api/timeline-events`;
+
+      console.log('🔵 API URL:', apiUrl);
+
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      console.log('🟢 API status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(
+          `Timeline API returned HTTP ${response.status}`
+        );
       }
-    };
 
-    fetchEvents();
-  }, []);
+      const data = await response.json();
+
+      console.log('🟢 Timeline data:', data);
+
+      if (!Array.isArray(data)) {
+        throw new Error('Timeline API did not return an array');
+      }
+
+      setEvents(data);
+
+    } catch (error) {
+      console.error('🔴 Timeline API error:', error);
+
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        setError(
+          'The timeline API took too long to respond. Please try again.'
+        );
+      } else {
+        setError(
+          error instanceof Error
+            ? error.message
+            : 'Unable to load timeline events.'
+        );
+      }
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchEvents();
+}, []);
+ 
 
   // Filter events
   let filteredEvents = events.filter(event => {
