@@ -3,13 +3,13 @@ import { motion } from 'motion/react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Progress } from './ui/progress';
-import { BookOpen, MapPin, Calendar, TrendingUp, User, Target, BrainCircuit, ArrowRight, MessageCircle } from 'lucide-react';
+import { BookOpen, MapPin, Calendar, TrendingUp, User, Target, BrainCircuit, ArrowRight } from 'lucide-react';
 import { UserProfile, QuizResult, User as UserType } from '../App';
 
 interface DashboardProps {
   userProfile: UserProfile | null;
   quizResult: QuizResult | null;
-  onNavigate: (page: 'courses' | 'career-path' | 'colleges' | 'timeline' | 'quiz' | 'profile-form' | 'stream-chatbot') => void;
+  onNavigate: (page: 'courses' | 'career-path' | 'colleges' | 'timeline' | 'quiz' | 'profile-form') => void;
 }
 
 export function Dashboard({ userProfile, quizResult, onNavigate }: DashboardProps) {
@@ -313,17 +313,11 @@ export function Dashboard({ userProfile, quizResult, onNavigate }: DashboardProp
         </Card>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('courses')}>
             <BookOpen className="h-12 w-12 text-blue-600 mb-4" />
             <h3 className="text-lg mb-2">Course Recommendations</h3>
             <p className="text-muted-foreground text-sm">Discover courses that match your aptitude and interests</p>
-          </Card>
-
-          <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('stream-chatbot')}>
-            <MessageCircle className="h-12 w-12 text-indigo-600 mb-4" />
-            <h3 className="text-lg mb-2">AI Stream Guide</h3>
-            <p className="text-muted-foreground text-sm">Get personalized stream recommendations through AI-powered chat</p>
           </Card>
 
           <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onNavigate('career-path')}>

@@ -1,7 +1,11 @@
 import React from 'react';
 import { motion } from 'motion/react';
 
-export function LoadingSpinner({ message = "Loading..." }) {
+interface LoadingSpinnerProps {
+  message?: string;
+}
+
+export function LoadingSpinner({ message = "Loading..." }: LoadingSpinnerProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
       <motion.div
@@ -40,7 +44,7 @@ export function LoadingSpinner({ message = "Loading..." }) {
   );
 }
 
-export function ProgressiveLoader({ steps, currentStep }) {
+export function ProgressiveLoader({ steps, currentStep }: { steps: string[], currentStep: number }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
       <motion.div

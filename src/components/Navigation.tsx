@@ -2,13 +2,23 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
-import { Home, BookOpen, TrendingUp, MapPin, Calendar, User, LogOut, Settings, ChevronDown, Moon, Sun, MessageCircle } from 'lucide-react';
+import { Home, BookOpen, TrendingUp, MapPin, Calendar, User, LogOut, Settings, ChevronDown, Moon, Sun } from 'lucide-react';
+import { UserProfile, User as UserType } from '../App';
 import { DarkModeToggle } from './DarkModeToggle';
 
-export function Navigation({ currentPage, onNavigate, userProfile, user, onLogout, isDarkMode, onToggleDarkMode }) {
+interface NavigationProps {
+  currentPage: string;
+  onNavigate: (page: 'dashboard' | 'courses' | 'career-path' | 'colleges' | 'timeline') => void;
+  userProfile: UserProfile | null;
+  user: UserType | null;
+  onLogout: () => void;
+  isDarkMode: boolean;
+  onToggleDarkMode: () => void;
+}
+
+export function Navigation({ currentPage, onNavigate, userProfile, user, onLogout, isDarkMode, onToggleDarkMode }: NavigationProps) {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'stream-chatbot', label: 'AI Stream Guide', icon: MessageCircle },
     { id: 'courses', label: 'Courses', icon: BookOpen },
     { id: 'career-path', label: 'Career Path', icon: TrendingUp },
     { id: 'colleges', label: 'Colleges', icon: MapPin },
@@ -36,7 +46,7 @@ export function Navigation({ currentPage, onNavigate, userProfile, user, onLogou
                 >
                   <Button
                     variant={isActive ? "default" : "ghost"}
-                    onClick={() => onNavigate(item.id)}
+                    onClick={() => onNavigate(item.id as any)}
                     className="flex items-center space-x-2"
                   >
                     <Icon className="h-4 w-4" />
@@ -112,7 +122,7 @@ export function Navigation({ currentPage, onNavigate, userProfile, user, onLogou
                   key={item.id}
                   variant={isActive ? "default" : "ghost"}
                   size="sm"
-                  onClick={() => onNavigate(item.id)}
+                  onClick={() => onNavigate(item.id as any)}
                   className="flex flex-col items-center space-y-1 h-auto py-2 px-2"
                 >
                   <Icon className="h-4 w-4" />

@@ -41,7 +41,7 @@ export function FloatingElements() {
   );
 }
 
-export function ParticleEffect({ trigger }) {
+export function ParticleEffect({ trigger }: { trigger: boolean }) {
   if (!trigger) return null;
 
   const particles = Array.from({ length: 20 }, (_, i) => ({

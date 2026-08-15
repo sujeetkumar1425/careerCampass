@@ -106,9 +106,9 @@ export function CourseRecommendations({ userProfile, quizResult }: CourseRecomme
   const [selectedStream, setSelectedStream] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('match');
 
-  if (!userProfile || !quizResult) {
-    return <div>Loading...</div>;
-  }
+  /*if (!userProfile || !quizResult) {
+    return <div></div>;
+  }*/
 
   // Filter and sort courses based on user preferences
   let filteredCourses = allCourses.filter(course => {

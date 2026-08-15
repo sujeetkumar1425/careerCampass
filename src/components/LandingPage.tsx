@@ -3,9 +3,12 @@ import { motion } from 'motion/react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { BookOpen, Target, MapPin, Calendar, Users, Brain } from 'lucide-react';
-import { DarkModeToggle } from './DarkModeToggle';
 
-export function LandingPage({ onStartQuiz, isDarkMode, onToggleDarkMode }) {
+interface LandingPageProps {
+  onStartQuiz: () => void;
+}
+
+export function LandingPage({ onStartQuiz }: LandingPageProps) {
   const features = [
     {
       icon: Brain,
@@ -47,11 +50,6 @@ export function LandingPage({ onStartQuiz, isDarkMode, onToggleDarkMode }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Dark Mode Toggle - Fixed Position */}
-      <div className="fixed top-4 right-4 z-50">
-        <DarkModeToggle isDarkMode={isDarkMode} onToggle={onToggleDarkMode} />
-      </div>
-      
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-8">
         <motion.div 

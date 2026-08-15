@@ -3,7 +3,12 @@ import { motion } from 'motion/react';
 import { Button } from './ui/button';
 import { Moon, Sun } from 'lucide-react';
 
-export function DarkModeToggle({ isDarkMode, onToggle }) {
+interface DarkModeToggleProps {
+  isDarkMode: boolean;
+  onToggle: () => void;
+}
+
+export function DarkModeToggle({ isDarkMode, onToggle }: DarkModeToggleProps) {
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}

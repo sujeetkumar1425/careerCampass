@@ -6,8 +6,15 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Separator } from './ui/separator';
 import { Eye, EyeOff, Mail, Lock, User, Chrome } from 'lucide-react';
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "../firebase";
 
-export function Login({ onLogin, onSignUp }) {
+interface LoginProps {
+  onLogin: (user: { id: string; name: string; email: string }) => void;
+  onSignUp: () => void;
+}
+
+export function Login({ onLogin, onSignUp }: LoginProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -17,10 +24,10 @@ export function Login({ onLogin, onSignUp }) {
     password: '',
     confirmPassword: ''
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: Record<string, string> = {};
 
     if (!formData.email) {
       newErrors.email = 'Email is required';
@@ -47,58 +54,166 @@ export function Login({ onLogin, onSignUp }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const user = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: formData.name || formData.email.split('@')[0],
-        email: formData.email
-      };
-      
-      onLogin(user);
+    setErrors({});
+
+    try {
+      if (isSignUp) {
+        // Firebase Sign Up
+        const { createUserWithEmailAndPassword, updateProfile } =
+          await import("firebase/auth");
+
+        const result = await createUserWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
+
+        // Save user's name in Firebase
+        await updateProfile(result.user, {
+          displayName: formData.name,
+        });
+
+        onLogin({
+          id: result.user.uid,
+          name: formData.name,
+          email: result.user.email || formData.email,
+        });
+      } else {
+        // Firebase Sign In
+        const { signInWithEmailAndPassword } =
+          await import("firebase/auth");
+
+        const result = await signInWithEmailAndPassword(
+          auth,
+          formData.email,
+          formData.password
+        );
+
+        onLogin({
+          id: result.user.uid,
+          name:
+            result.user.displayName ||
+            result.user.email?.split("@")[0] ||
+            "User",
+          email: result.user.email || formData.email,
+        });
+      }
+    } catch (error: any) {
+      console.error("Authentication error:", error);
+
+      let message = "Something went wrong. Please try again.";
+
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          message = "This email is already registered.";
+          break;
+
+        case "auth/invalid-email":
+          message = "Please enter a valid email address.";
+          break;
+
+        case "auth/weak-password":
+          message = "Password must be at least 6 characters.";
+          break;
+
+        case "auth/invalid-credential":
+          message = "Incorrect email or password.";
+          break;
+
+        case "auth/user-not-found":
+          message = "No account found with this email.";
+          break;
+
+        case "auth/wrong-password":
+          message = "Incorrect password.";
+          break;
+
+        default:
+          message = error.message || message;
+      }
+
+      setErrors({
+        general: message,
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
-    
-    // Simulate Google OAuth with more realistic data
-    setTimeout(() => {
-      // Simulate different Google users for demo purposes
-      const demoUsers = [
-        { name: 'Priya Sharma', email: 'priya.sharma@gmail.com' },
-        { name: 'Rahul Kumar', email: 'rahul.kumar@gmail.com' },
-        { name: 'Ananya Patel', email: 'ananya.patel@gmail.com' },
-        { name: 'Arjun Singh', email: 'arjun.singh@gmail.com' }
-      ];
-      
-      const randomUser = demoUsers[Math.floor(Math.random() * demoUsers.length)];
-      
-      const user = {
-        id: 'google_' + Math.random().toString(36).substr(2, 9),
-        name: randomUser.name,
-        email: randomUser.email
-      };
-      
-      // Auto-fill the form data with Google user info
-      setFormData(prev => ({
-        ...prev,
-        name: user.name,
-        email: user.email
-      }));
-      
-      onLogin(user);
+    setErrors({});
+
+    try {
+      const result = await signInWithPopup(
+        auth,
+        googleProvider
+      );
+
+      const user = result.user;
+
+      onLogin({
+        id: user.uid,
+        name:
+          user.displayName ||
+          user.email?.split("@")[0] ||
+          "User",
+        email: user.email || "",
+      });
+    } catch (error: any) {
+      console.error("Google login failed:", error);
+
+      if (error.code === "auth/popup-closed-by-user") {
+        setErrors({
+          general: "Google login was cancelled.",
+        });
+      } else {
+        setErrors({
+          general: error.message || "Google login failed.",
+        });
+      }
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
+  // const handleGoogleLogin = async () => {
+  //   setIsLoading(true);
+
+  //   // Simulate Google OAuth with more realistic data
+  //   setTimeout(() => {
+  //     // Simulate different Google users for demo purposes
+  //     const demoUsers = [
+  //       { name: 'Sujeet Kumar', email: 'sujeet.fz1425@gmail.com' },
+  //       { name: 'Sujeet Kumar', email: 'sujeet.fz1425@gmail.com' },
+  //       { name: 'Sujeet Kumar', email: 'sujeet.fz1425@gmail.com' }
+
+  //     ];
+
+  //     const randomUser = demoUsers[Math.floor(Math.random() * demoUsers.length)];
+
+  //     const user = {
+  //       id: 'google_' + Math.random().toString(36).substr(2, 9),
+  //       name: randomUser.name,
+  //       email: randomUser.email
+  //     };
+
+  //     // Auto-fill the form data with Google user info
+  //     setFormData(prev => ({
+  //       ...prev,
+  //       name: user.name,
+  //       email: user.email
+  //     }));
+
+  //     onLogin(user);
+  //     setIsLoading(false);
+  //   }, 1500);
+  // };
 
   const inputVariants = {
     focus: { scale: 1.02, transition: { duration: 0.2 } },
@@ -148,7 +263,7 @@ export function Login({ onLogin, onSignUp }) {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-center mb-8"
           >
-            <motion.h1 
+            <motion.h1
               className="text-3xl mb-2"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
@@ -183,10 +298,10 @@ export function Login({ onLogin, onSignUp }) {
                 />
               ) : (
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
               )}
               Continue with Google
@@ -204,6 +319,16 @@ export function Login({ onLogin, onSignUp }) {
               Or continue with email
             </span>
           </motion.div>
+          {errors.general && (
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-sm text-destructive text-center mb-4"
+            >
+              {errors.general}
+            </motion.p>
+          )}
+
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (

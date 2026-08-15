@@ -413,9 +413,9 @@ export function CollegeFinder({ userProfile, quizResult }: CollegeFinderProps) {
   const [selectedType, setSelectedType] = useState('all');
   const [sortBy, setSortBy] = useState('rating');
 
-  if (!userProfile || !quizResult) {
+  /*if (!userProfile || !quizResult) {
     return <div>Loading...</div>;
-  }
+  }*/
 
   // Filter colleges based on search criteria
   let filteredColleges = colleges.filter(college => {

@@ -160,9 +160,9 @@ const careerPaths: CareerPath[] = [
 export function CareerPathMapping({ userProfile, quizResult }: CareerPathMappingProps) {
   const [selectedPath, setSelectedPath] = useState<CareerPath | null>(null);
 
-  if (!userProfile || !quizResult) {
+ /* if (!userProfile || !quizResult) {
     return <div>Loading...</div>;
-  }
+  }*/
 
   const getDifficultyColor = (difficulty: string) => {
     if (difficulty === 'Easy') return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
