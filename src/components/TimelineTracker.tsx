@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -14,135 +14,202 @@ interface TimelineTrackerProps {
 interface TimelineEvent {
   id: string;
   title: string;
-  type: 'admission' | 'scholarship' | 'exam' | 'document';
+  type: 'admission' | 'scholarship' | 'exam' | 'document' | 'job';
   date: string;
   endDate?: string;
+  examDate?: string;
   description: string;
   institution: string;
   status: 'upcoming' | 'ongoing' | 'completed' | 'missed';
   priority: 'high' | 'medium' | 'low';
   requirements: string[];
   link?: string;
+  applicationLink?: string;
+  source?: string;
   reminder: boolean;
 }
 
-const timelineEvents: TimelineEvent[] = [
-  {
-    id: '1',
-    title: 'JEE Main 2024 Registration',
-    type: 'exam',
-    date: '2025-12-15',
-    endDate: '2026-01-15',
-    description: 'Joint Entrance Examination for admission to NITs, IIITs, and other engineering colleges',
-    institution: 'National Testing Agency',
-    status: 'upcoming',
-    priority: 'high',
-    requirements: ['Class 12 marksheet', 'Passport size photo', 'Category certificate (if applicable)'],
-    link: 'https://yourdomain.com',
-    reminder: true
-  },
-  {
-    id: '2',
-    title: 'CUET UG Application',
-    type: 'admission',
-    date: '2024-03-01',
-    endDate: '2024-03-31',
-    description: 'Common University Entrance Test for admission to central universities',
-    institution: 'National Testing Agency',
-    status: 'ongoing',
-    priority: 'high',
-    requirements: ['Class 12 marksheet', 'Passport size photo', 'Signature', 'Category certificate'],
-    link: 'https://yourdomain.com',
-    reminder: true
-  },
-  {
-    id: '3',
-    title: 'National Scholarship Portal',
-    type: 'scholarship',
-    date: '2024-02-20',
-    endDate: '2024-05-31',
-    description: 'Various central and state government scholarships for students',
-    institution: 'Government of India',
-    status: 'ongoing',
-    priority: 'medium',
-    requirements: ['Income certificate', 'Caste certificate', 'Bank details', 'Academic certificates'],
-    link: 'https://yourdomain.com',
-    reminder: true
-  },
-  {
-    id: '4',
-    title: 'IPU CET Application',
-    type: 'exam',
-    date: '2024-04-01',
-    endDate: '2024-04-30',
-    description: 'Guru Gobind Singh Indraprastha University Common Entrance Test',
-    institution: 'IPU',
-    status: 'upcoming',
-    priority: 'medium',
-    requirements: ['Class 12 certificate', 'Transfer certificate', 'Category certificate'],
-    link: 'https://yourdomain.com',
-    reminder: false
-  },
-  {
-    id: '5',
-    title: 'NEET UG Registration',
-    type: 'exam',
-    date: '2024-03-10',
-    endDate: '2024-04-10',
-    description: 'National Eligibility cum Entrance Test for medical courses',
-    institution: 'National Testing Agency',
-    status: 'upcoming',
-    priority: 'high',
-    requirements: ['Class 12 certificate', 'ID proof', 'Category certificate', 'PWD certificate'],
-    link: 'https://yourdomain.com',
-    reminder: true
-  },
-  {
-    id: '6',
-    title: 'Merit Scholarship for Girls',
-    type: 'scholarship',
-    date: '2024-03-01',
-    endDate: '2024-06-30',
-    description: 'Special scholarship program for meritorious girl students',
-    institution: 'Ministry of Education',
-    status: 'ongoing',
-    priority: 'medium',
-    requirements: ['Class 10/12 marksheet', 'Income certificate', 'Bank account details'],
-    reminder: true
-  },
-  {
-    id: '7',
-    title: 'Document Verification - DU',
-    type: 'document',
-    date: '2024-07-15',
-    endDate: '2024-07-25',
-    description: 'Document verification for Delhi University admissions',
-    institution: 'Delhi University',
-    status: 'upcoming',
-    priority: 'high',
-    requirements: ['Original certificates', 'Photocopies', 'Passport photos', 'Fee receipt'],
-    reminder: false
-  }
-];
+// const timelineEvents: TimelineEvent[] = [
+//   {
+//     id: '1',
+//     title: 'JEE Main 2024 Registration',
+//     type: 'exam',
+//     date: '2025-12-15',
+//     endDate: '2026-01-15',
+//     description: 'Joint Entrance Examination for admission to NITs, IIITs, and other engineering colleges',
+//     institution: 'National Testing Agency',
+//     status: 'upcoming',
+//     priority: 'high',
+//     requirements: ['Class 12 marksheet', 'Passport size photo', 'Category certificate (if applicable)'],
+//     link: 'https://yourdomain.com',
+//     reminder: true
+//   },
+//   {
+//     id: '2',
+//     title: 'CUET UG Application',
+//     type: 'admission',
+//     date: '2024-03-01',
+//     endDate: '2024-03-31',
+//     description: 'Common University Entrance Test for admission to central universities',
+//     institution: 'National Testing Agency',
+//     status: 'ongoing',
+//     priority: 'high',
+//     requirements: ['Class 12 marksheet', 'Passport size photo', 'Signature', 'Category certificate'],
+//     link: 'https://yourdomain.com',
+//     reminder: true
+//   },
+//   {
+//     id: '3',
+//     title: 'National Scholarship Portal',
+//     type: 'scholarship',
+//     date: '2024-02-20',
+//     endDate: '2024-05-31',
+//     description: 'Various central and state government scholarships for students',
+//     institution: 'Government of India',
+//     status: 'ongoing',
+//     priority: 'medium',
+//     requirements: ['Income certificate', 'Caste certificate', 'Bank details', 'Academic certificates'],
+//     link: 'https://yourdomain.com',
+//     reminder: true
+//   },
+//   {
+//     id: '4',
+//     title: 'IPU CET Application',
+//     type: 'exam',
+//     date: '2024-04-01',
+//     endDate: '2024-04-30',
+//     description: 'Guru Gobind Singh Indraprastha University Common Entrance Test',
+//     institution: 'IPU',
+//     status: 'upcoming',
+//     priority: 'medium',
+//     requirements: ['Class 12 certificate', 'Transfer certificate', 'Category certificate'],
+//     link: 'https://yourdomain.com',
+//     reminder: false
+//   },
+//   {
+//     id: '5',
+//     title: 'NEET UG Registration',
+//     type: 'exam',
+//     date: '2024-03-10',
+//     endDate: '2024-04-10',
+//     description: 'National Eligibility cum Entrance Test for medical courses',
+//     institution: 'National Testing Agency',
+//     status: 'upcoming',
+//     priority: 'high',
+//     requirements: ['Class 12 certificate', 'ID proof', 'Category certificate', 'PWD certificate'],
+//     link: 'https://yourdomain.com',
+//     reminder: true
+//   },
+//   {
+//     id: '6',
+//     title: 'Merit Scholarship for Girls',
+//     type: 'scholarship',
+//     date: '2024-03-01',
+//     endDate: '2024-06-30',
+//     description: 'Special scholarship program for meritorious girl students',
+//     institution: 'Ministry of Education',
+//     status: 'ongoing',
+//     priority: 'medium',
+//     requirements: ['Class 10/12 marksheet', 'Income certificate', 'Bank account details'],
+//     reminder: true
+//   },
+//   {
+//     id: '7',
+//     title: 'Document Verification - DU',
+//     type: 'document',
+//     date: '2024-07-15',
+//     endDate: '2024-07-25',
+//     description: 'Document verification for Delhi University admissions',
+//     institution: 'Delhi University',
+//     status: 'upcoming',
+//     priority: 'high',
+//     requirements: ['Original certificates', 'Photocopies', 'Passport photos', 'Fee receipt'],
+//     reminder: false
+//   }
+// ];
 
 export function TimelineTracker({ userProfile }: TimelineTrackerProps) {
+  const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  if (!userProfile) {
-    return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg font-medium">
+            Loading latest opportunities...
+          </div>
+
+          <p className="text-muted-foreground mt-2">
+            Fetching current exams, admissions and scholarships
+          </p>
+        </div>
+      </div>
+    );
   }
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-10 w-10 text-red-600 mx-auto mb-3" />
+
+          <h2 className="text-lg font-medium">
+            Unable to load events
+          </h2>
+
+          <p className="text-muted-foreground mt-2">
+            {error}
+          </p>
+
+          <Button
+            className="mt-4"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const response = await fetch('/api/timeline-events');
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch timeline events');
+        }
+
+        const data = await response.json();
+
+        setEvents(data);
+      } catch (error) {
+        console.error('Timeline API error:', error);
+        setError('Unable to load current exam and registration data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   // Filter events
-  let filteredEvents = timelineEvents.filter(event => {
+  let filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.institution.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+      event.institution.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.description.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesType = selectedType === 'all' || event.type === selectedType;
     const matchesStatus = selectedStatus === 'all' || event.status === selectedStatus;
-    
+
     return matchesSearch && matchesType && matchesStatus;
   });
 
@@ -243,7 +310,7 @@ export function TimelineTracker({ userProfile }: TimelineTrackerProps) {
                   />
                 </div>
               </div>
-              
+
               <div className="flex gap-2">
                 <select
                   value={selectedType}
@@ -276,7 +343,7 @@ export function TimelineTracker({ userProfile }: TimelineTrackerProps) {
               {filteredEvents.map((event) => {
                 const TypeIcon = getTypeIcon(event.type);
                 const daysUntil = getDaysUntil(event.date);
-                
+
                 return (
                   <Card key={event.id} className="p-6 hover:shadow-lg transition-shadow">
                     <div className="flex items-start justify-between mb-4">
@@ -301,7 +368,7 @@ export function TimelineTracker({ userProfile }: TimelineTrackerProps) {
                           <p className="text-sm">{event.description}</p>
                         </div>
                       </div>
-                      
+
                       <div className="text-right">
                         <div className="text-sm text-muted-foreground mb-1">
                           {event.endDate ? (
@@ -346,10 +413,20 @@ export function TimelineTracker({ userProfile }: TimelineTrackerProps) {
                           {event.priority} priority
                         </Badge>
                       </div>
-                      
+
                       <div className="flex space-x-2">
                         {event.link && (
-                          <Button variant="outline" size="sm">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              window.open(
+                                event.link,
+                                '_blank',
+                                'noopener,noreferrer'
+                              )
+                            }
+                          >
                             Visit Website
                           </Button>
                         )}
